@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Vote - Online Voting System</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #121212;
+      color: #e0e0e0;
+      margin: 0;
+      padding: 20px;
+    }
+    .vote-container {
+      max-width: 900px;
+      margin: auto;
+      background: #1e1e1e;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+    }
+    h2 {
+      text-align: center;
+      color: #4caf50;
+    }
+    .candidate {
+      display: flex;
+      align-items: center;
+      border: 1px solid #333;
+      padding: 12px;
+      margin: 10px 0;
+      border-radius: 5px;
+      background: #2c2c2c;
+      cursor: pointer;
+      transition: border-color 0.3s ease;
+    }
+    .candidate:hover {
+      border-color: #4caf50;
+    }
+    .candidate img {
+      width: 60px;
+      height: 60px;
+      border-radius: 5px;
+      margin-right: 15px;
+    }
+    .btn-vote {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 12px 25px;
+      background: #4caf50;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+      transition: background 0.3s ease;
+    }
+    .btn-vote:hover {
+      background: #43a047;
+    }
+    .disabled {
+      pointer-events: none;
+      opacity: 0.5;
+    }
+    #statusMessage {
+      font-weight: bold;
+      margin-top: 15px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="vote-container">
+    <h2>Cast Your Vote</h2>
+    <div id="candidateList">
+      <!-- Candidate cards will be loaded here -->
+    </div>
+    <a href="#" id="castVoteBtn" class="btn-vote" style="display:none;">Cast Vote</a>
+    <div id="statusMessage"></div>
+  </div>
+
+  <script>
+    let selectedCandidate = null;
+    const candidateListElem = document.getElementById("candidateList");
+    const castVoteBtn = document.getElementById("castVoteBtn");
+    const statusMessageElem = document.getElementById("statusMessage");
+
+    // Get query parameters (username, hasVoted)
+    const params = new URLSearchParams(window.location.search);
+    const username = params.get("username");
+    const hasVoted = params.get("hasVoted");
+
+    // Display voting status and disable voting if already voted
+    if (hasVoted === "true") {
+      statusMessageElem.textContent = "You have already voted. Thank you!";
+      statusMessageElem.style.color = "#4caf50";
+    } else {
+      statusMessageElem.textContent = "Please select a candidate to vote.";
+      statusMessageElem.style.color = "#f44336";
+    }
+
+    // Fetch candidates from the backend API
+    fetch("/api/candidates")
+      .then(response => response.json())
+      .then(candidates => {
+        candidates.forEach(candidate => {
+          // Create candidate card
+          const candidateDiv = document.createElement("div");
+          candidateDiv.className = "candidate";
+          candidateDiv.onclick = (event) => selectCandidate(candidate.id, event);
+          candidateDiv.innerHTML = `
+            <img src="/static/images/${candidate.symbol}" alt="${candidate.name}">
+            <div>
+              <strong>${candidate.name}</strong><br>
+              <small>Party: ${candidate.party}</small>
+            </div>
+          `;
+          candidateListElem.appendChild(candidateDiv);
+        });
+        // If voter already voted, disable selection
+        if (hasVoted === "true") {
+          document.querySelectorAll('.candidate').forEach(c => {
+            c.classList.add("disabled");
+          });
+          castVoteBtn.style.display = "none";
+        }
+      })
+      .catch(err => {
+        console.error("Failed to load candidates:", err);
+        statusMessageElem.textContent = "Error loading candidates.";
+      });
+
+    function selectCandidate(candidateId, event) {
+      if (hasVoted === "true") return; // Do nothing if already voted
+
+      selectedCandidate = candidateId;
+      // Remove highlight from all candidates
+      document.querySelectorAll('.candidate').forEach(c => {
+        c.style.borderColor = "#333";
+      });
+      // Highlight the selected candidate
+      event.currentTarget.style.borderColor = "#4caf50";
+
+      // Show the "Cast Vote" button
+      castVoteBtn.style.display = "inline-block";
+    }
+
+    // Vote casting function
+    castVoteBtn.addEventListener("click", function() {
+      if (!username || !selectedCandidate) {
+        alert("Select a candidate and ensure you are logged in.");
+        return;
+      }
+      fetch("/vote", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, candidateId: selectedCandidate })
+      })
+      .then(response => response.text())
+      .then(data => {
+        alert(data);
+        // After voting, redirect to dashboard with hasVoted true
+        window.location.href = `/voter_dashboard?username=${encodeURIComponent(username)}&hasVoted=true`;
+      })
+      .catch(err => {
+        console.error("Error:", err);
+        alert("An error occurred while casting your vote.");
+      });
+    });
+  </script>
+</body>
+</html>

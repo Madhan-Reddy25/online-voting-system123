@@ -1,0 +1,32 @@
+[
+  {
+    "firstName": "John",
+    "lastName": "Doe",
+    "mobile": "1234567890",
+    "email": "john@example.com",
+    "username": "johndoe",
+    "password": "hashedPassword",
+    "aadhaar": "123412341234",
+    "hasVoted": false
+  },
+  {
+    "firstName": "afdf",
+    "lastName": "dfasdf",
+    "mobile": "1234567890",
+    "email": "Programmer.117.5@gmail.com",
+    "username": "madhanaturu864@gmail.com",
+    "password": "1122",
+    "aadhaar": "123456789012",
+    "hasVoted": true
+  },
+  {
+    "firstName": "q",
+    "lastName": "qwq",
+    "mobile": "1234567899",
+    "email": "Programmer.17.5@gmail.com",
+    "username": "profjasdfkjsf",
+    "password": "1222",
+    "aadhaar": "123456789012",
+    "hasVoted": false
+  }
+]

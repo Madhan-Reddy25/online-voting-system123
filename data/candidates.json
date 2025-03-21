@@ -1,0 +1,19 @@
+[
+  {
+    "id": 1,
+    "name": "Keshav",
+    "party": "Future Leaders",
+    "symbol": "flower.png",
+    "classification": "Experienced leader with 10 years in community service",
+    "experience": "10 years",
+    "votes": 1
+  },
+  {
+    "id": 2,
+    "name": "Sudharani",
+    "party": "People's Voice",
+    "symbol": "fan.png",
+    "classification": "Advocate for education and healthcare",
+    "experience": "8 years"
+  }
+]
